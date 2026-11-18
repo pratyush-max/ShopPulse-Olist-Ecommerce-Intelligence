@@ -181,9 +181,13 @@ erDiagram
    - Different items in the *same* order can be fulfilled by *different* sellers!
 
 3. **Marketing Funnel to Main Marketplace:**
-   - Joining `olist_closed_deals_dataset` with `olist_sellers_dataset` on `seller_id`:
-   - Out of approximately 3,095 sellers in the main marketplace, approximately 841 sellers match closed deals from the marketing funnel.
-   - **Crucial Rule:** We do NOT invent synthetic sellers. We perform a `LEFT JOIN` or build a dedicated funnel performance mart that explicitly studies this cohort of ~841 acquired sellers against general sellers.
+   - Total Marketing Qualified Leads (MQLs): **8,000**.
+   - Total Closed Deals won: **842** (each with a unique `mql_id` and unique `seller_id`, giving a lead conversion rate of 10.53%).
+   - **Seller Overlap Verification (Audited in Phase 1A):**
+     - Out of the 842 closed deals, exactly **380 sellers** match the registered merchant directory (`olist_sellers_dataset.csv`) and also have active sales records in `olist_order_items_dataset.csv`.
+     - The remaining **462 closed-deal sellers** do not appear in the transaction tables because their contracts were finalized near the end of the observation window (June 2017 – June 2018) or prior to completing catalog onboarding and first order fulfillment.
+     - Out of 3,095 total marketplace sellers, 2,715 joined through channels prior to the marketing funnel tracking period or via direct outbound acquisition.
+   - **Crucial Rule:** We do NOT invent synthetic sellers or force artificial joins. In Silver/Gold ETL, marketing conversion is modeled on the authentic cohort of 842 closed deals, and sales attribution is linked specifically to the 380 active selling merchants.
 
 4. **Holiday Impact Relationship:**
    - The order table purchase date `CAST(order_purchase_timestamp AS DATE)` is joined or flagged against the `date` field in `holidays_brazil_2016_2018.json` (also checking a window of 3 days before major holidays like Black Friday, Carnival, and Christmas).

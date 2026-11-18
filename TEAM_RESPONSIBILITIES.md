@@ -10,12 +10,13 @@
 
 | Role ID | Role Title | Core Responsibilities | Assigned Member |
 | :--- | :--- | :--- | :--- |
-| **LEAD-01** | **Project Architect & Integration Lead** | Architecture design, Databricks cluster management, Git repository orchestration, overall quality assurance, pipeline coordination | `[Student Name 1 - Team Leader]` |
-| **DATA-02** | **Data Ingestion & Storage Engineer** | REST API extraction script (`src/extraction`), dataset collection, schema validation, Databricks Unity Catalog Volume / DBFS raw upload | `[Student Name 2]` |
-| **SPARK-03** | **Big Data & PySpark ETL Engineer** | Databricks PySpark development, Medallion Architecture implementation (Bronze, Silver, Gold Delta tables), business logic & KPI calculations | `[Student Name 3]` |
-| **BI-04** | **BI Developer & Documentation Specialist** | Power BI dashboard development, DAX measures, data validation tests, academic project report, and presentation slide deck | `[Student Name 4]` |
+| **LEAD-01** | **Project Architect & Integration Lead** | Architecture design, Databricks cluster management, Git repository orchestration, overall quality assurance, pipeline coordination | `[Student Name 1 - Team Leader]` *(Requires confirmation)* |
+| **DATA-02** | **Data Ingestion & Storage Engineer** | REST API extraction script (`src/extraction`), dataset collection, schema validation, Databricks Unity Catalog Volume / DBFS raw upload | `[Student Name 2]` *(Requires confirmation)* |
+| **SPARK-03** | **Big Data & PySpark ETL Engineer** | Databricks PySpark development, Medallion Architecture implementation (Bronze, Silver, Gold Delta tables), business logic & KPI calculations | `[Student Name 3]` *(Requires confirmation)* |
+| **BI-04** | **BI Developer & Documentation Specialist** | Power BI dashboard development, DAX measures, data validation tests, academic project report, and presentation slide deck | `[Student Name 4]` *(Requires confirmation)* |
 
-*(Note: If working as a 3-member team, responsibilities for **BI-04** are divided between **LEAD-01** and **SPARK-03**).*
+> **Note on Team Assignments:**  
+> The team member names bracketed above (`[Student Name 1-4]`) are placeholders that must be finalized by the project group prior to submission. *(Note: If working as a 3-member team, responsibilities for **BI-04** are divided between **LEAD-01** and **SPARK-03**).*
 
 ---
 
@@ -56,7 +57,7 @@
 
 ### Role 4: BI Developer & Documentation Specialist (`[Student Name 4]`)
 - **Primary Deliverables:**
-  - Interactive Microsoft Power BI dashboard (5 executive reporting pages).
+  - Interactive Microsoft Power BI dashboard (4 executive reporting pages: Executive Overview, Sales and Product Analysis, Customer Intelligence, Marketing and Operations).
   - Data modeling in Power BI (Star Schema with 1:Many relationships).
   - DAX measures documented in `powerbi/dax_measures.md`.
   - Academic project report (`docs/project_report.md`) and slide deck (`docs/presentation_outline.md`).

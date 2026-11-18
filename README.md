@@ -20,17 +20,18 @@ An enterprise-grade, end-to-end Big Data Engineering and Business Intelligence p
   - [Bronze Layer (Raw Delta Ingestion)](#bronze-layer-raw-delta-ingestion)
   - [Silver Layer (Cleansed & Enriched Delta)](#silver-layer-cleansed--enriched-delta)
   - [Gold Layer (Curated Dimensional Marts)](#gold-layer-curated-dimensional-marts)
-- [6. ETL Workflow & Data Pipeline](#6-etl-workflow--data-pipeline)
-- [7. Power BI Executive Dashboard](#7-power-bi-executive-dashboard)
+- [6. Databricks Implementation Notebooks](#6-databricks-implementation-notebooks)
+- [7. ETL Workflow & Data Pipeline](#7-etl-workflow--data-pipeline)
+- [8. Power BI Executive Dashboard](#8-power-bi-executive-dashboard)
   - [Page 1: Executive Overview](#page-1-executive-overview)
   - [Page 2: Sales and Product Analysis](#page-2-sales-and-product-analysis)
   - [Page 3: Customer Intelligence](#page-3-customer-intelligence)
   - [Page 4: Marketing and Operations](#page-4-marketing-and-operations)
-- [8. Key Business Insights & Validated KPIs](#8-key-business-insights--validated-kpis)
-- [9. Repository Structure](#9-repository-structure)
-- [10. Setup and Execution Instructions](#10-setup-and-execution-instructions)
-- [11. Limitations & Future Enhancements](#11-limitations--future-enhancements)
-- [12. Contributors & Attribution](#12-contributors--attribution)
+- [9. Key Business Insights & Validated KPIs](#9-key-business-insights--validated-kpis)
+- [10. Repository Structure](#10-repository-structure)
+- [11. Setup and Execution Instructions](#11-setup-and-execution-instructions)
+- [12. Limitations & Future Enhancements](#12-limitations--future-enhancements)
+- [13. Contributors & Attribution](#13-contributors--attribution)
 
 ---
 
@@ -49,10 +50,10 @@ Marketplace leadership teams face critical visibility challenges:
 
 ## 2. Project Objectives
 
-1. **Scalable Cloud Ingestion:** Ingest 100,000+ orders and 1.1+ million geolocation records into governed cloud object storage using Databricks Unity Catalog Volumes.
-2. **Medallion Data Lakehouse:** Construct an automated, ACID-compliant Medallion pipeline (Bronze $\rightarrow$ Silver $\rightarrow$ Gold) using Delta Lake and PySpark.
+1. **Scalable Cloud Ingestion:** Ingest 100,000+ orders and 1.1+ million geolocation records into governed cloud object storage using Databricks Unity Catalog Volumes (`/Volumes/workspace/default/shoppulse_raw/`).
+2. **Medallion Data Lakehouse:** Construct an automated, ACID-compliant Medallion pipeline (Bronze $\rightarrow$ Silver $\rightarrow$ Gold) using Delta Lake and PySpark across schemas `workspace.default`, `workspace.silver`, and `workspace.gold`.
 3. **Data Quality & Anomaly Handling:** Enforce strict schemas, handle multi-line customer reviews, deduplicate records, and handle null timestamps.
-4. **Star-Schema Dimensional Modeling:** Generate analytics-ready dimensional marts and aggregated business tables.
+4. **Star-Schema Dimensional Modeling:** Generate analytics-ready dimensional marts, granular fact tables, and aggregated business tables.
 5. **Interactive Business Intelligence:** Build a high-performance, 4-page Power BI dashboard connected to Databricks SQL with validated DAX measures.
 
 ---
@@ -76,8 +77,8 @@ The platform integrates two Kaggle open datasets alongside a live external REST 
 - **Storage & Governance:** Databricks Unity Catalog Managed Volumes (`/Volumes/workspace/default/shoppulse_raw/`)
 - **Compute Engine:** Apache Spark 3.5+ (Databricks Runtime 14.3 LTS / Serverless PySpark)
 - **Table Format:** Delta Lake (ACID transactions, time-travel, partition optimization)
-- **Programming & Scripting:** Python 3.12, PySpark, PowerShell, SQL
-- **Serving Layer:** Databricks SQL Warehouse (DirectQuery / Import via Thrift API)
+- **Programming & Scripting:** Python 3.12, PySpark, PowerShell, SQL, DAX
+- **Serving Layer:** Databricks SQL Warehouse (DirectQuery / Import via Thrift API on Port 443)
 - **Business Intelligence:** Microsoft Power BI Desktop (4-page interactive dashboard, Star Schema, custom DAX)
 - **Version Control:** Git & GitHub
 
@@ -101,9 +102,9 @@ flowchart TB
 
     subgraph Medallion["2. Databricks Lakehouse (PySpark & Delta Lake)"]
         direction TB
-        B[("Bronze Layer (Raw Delta)\nAppend-only raw tables with _ingested_at metadata")]
-        S[("Silver Layer (Cleansed Delta)\nTyped, deduplicated, enriched joins & holiday proximity")]
-        G[("Gold Layer (Curated Marts)\nStar schema facts & pre-aggregated dimensional KPIs")]
+        B[("Bronze Layer (Schema: workspace.default)\nAppend-only raw tables with _ingested_at metadata")]
+        S[("Silver Layer (Schema: workspace.silver)\nTyped, deduplicated, enriched joins & holiday proximity")]
+        G[("Gold Layer (Schema: workspace.gold)\nStar schema dimensions, fact tables & KPI marts")]
         UC --> B
         B --> S
         S --> G
@@ -111,49 +112,98 @@ flowchart TB
 
     subgraph BI["3. Serving & Analytics"]
         DWH["Databricks SQL Warehouse\n(Port 443 / Thrift)"]
-        PBI["Power BI Dashboard (4 Pages)\nExecutive, Sales, Customers, Marketing & Ops"]
+        PBI["Power BI Dashboard (4 Pages)\nExecutive Overview, Sales & Product,\nCustomer Intelligence, Marketing & Operations"]
         G --> DWH
         DWH --> PBI
     end
 ```
 
-### Bronze Layer (Raw Delta Ingestion)
-- Reads raw CSV and JSON files directly from Unity Catalog Volumes.
-- Preserves full schema fidelity without loss of source records.
+### Bronze Layer (Raw Delta Ingestion — `workspace.default`)
+- Reads raw CSV and JSON files directly from Unity Catalog Volume `/Volumes/workspace/default/shoppulse_raw/`.
+- Preserves full schema fidelity without loss of source records (100% row-count parity).
 - Adds metadata audit columns: `_ingested_at` (UTC timestamp) and `_source_file`.
 - Implements specialized CSV parsing with `multiLine=True` and `escape='"'` to prevent record corruption on customer review text containing newlines.
+- Tables: `bronze_orders`, `bronze_order_items`, `bronze_customers`, `bronze_products`, `bronze_sellers`, `bronze_payments`, `bronze_reviews`, `bronze_geolocation`, `bronze_category_translation`, `bronze_marketing_qualified_leads`, `bronze_closed_deals`, `bronze_brazil_public_holidays`.
 
-### Silver Layer (Cleansed & Enriched Delta)
+### Silver Layer (Cleansed & Enriched Delta — `workspace.silver`)
 - **Schema & Type Enforcement:** Casts monetary amounts to `Double`, identifiers to clean strings, and date strings to ISO `Timestamp`.
 - **Deduplication:** Deduplicates orders and review records on primary business keys.
-- **Relational Joins:** Resolves English category translations from Portuguese naming.
+- **Relational Joins:** Resolves English category translations from Portuguese naming (`silver_products`).
 - **Holiday Tagging:** Enriches orders with boolean flags and day offsets against Brazilian public holiday dates to isolate seasonal fulfillment friction.
+- Tables: `silver_orders`, `silver_customers`, `silver_order_items`, `silver_products`, `silver_sellers`, `silver_payments`, `silver_reviews`, `silver_geolocation`, `silver_marketing_qualified_leads`, `silver_closed_deals`.
 
-### Gold Layer (Curated Dimensional Marts)
-- **`fact_orders`**: Central fact table tracking 99,441 marketplace orders with status, timestamps, customer state, seller state, and payment dimensions.
-- **`agg_customer_behavior`**: Curated customer profile mart (95,420 unique purchasers) evaluating frequency, monetary spend, and lifetime value.
-- **`kpi_monthly_sales` & `kpi_monthly_payments`**: Monthly revenue, order volumes, freight metrics, and installment trends.
-- **`kpi_top_10_categories` & `kpi_sales_by_category`**: Product category revenue rankings and volume distributions.
-- **`kpi_monthly_delivery` & `kpi_reviews_by_state`**: Delivery lead times, carrier delay metrics, and customer satisfaction scores by geographic region.
+### Gold Layer (Curated Dimensional Marts — `workspace.gold`)
+- **Dimensions:** `dim_date`, `dim_products`, `dim_sellers`, `dim_customers`, `dim_geolocation`.
+- **Fact Tables:**
+  - `fact_sales`: 98,666 orders with fulfilled items, product GMV, freight, and net values.
+  - `fact_payments`: 103,886 payment records across payment types and installment counts.
+  - `fact_reviews`: 99,224 review scores, sentiment ratings, and response times.
+  - `fact_marketing_conversion`: 8,000 MQLs, 842 closed deals, and conversion time intervals.
+  - `fact_orders`: Master fact tracking all 99,441 registered orders across all lifecycle statuses.
+- **Analytical & KPI Marts:**
+  - `kpi_executive_summary`: High-level executive scorecard (AOV: R$ 160.58).
+  - `kpi_monthly_sales` & `kpi_monthly_payments`: Monthly revenue, freight, and installment trends.
+  - `kpi_top_10_categories` & `kpi_sales_by_category`: Category revenue rankings and volume shares.
+  - `kpi_sales_by_state` & `kpi_sales_by_seller_state`: Geographic sales distributions.
+  - `kpi_monthly_delivery`: 93.13% on-time delivery rate, carrier transit times, and delay severity.
+  - `kpi_monthly_marketing`: Lead generation velocity and acquisition channel conversions.
+  - `kpi_reviews_by_state` & `kpi_monthly_reviews`: Customer satisfaction ratings by region.
+  - `agg_customer_behavior`: Customer profile mart (95,420 unique purchasers, 3.05% repeat rate).
+  - `kpi_customer_segments` & `kpi_monthly_customer_acquisition`: Retention and acquisition metrics.
 
 ---
 
-## 6. ETL Workflow & Data Pipeline
+## 6. Databricks Implementation Notebooks
+
+The full Lakehouse processing engine is authored and saved across two production Jupyter/Databricks notebooks in the repository:
+
+```text
+notebooks/
+├── 01_Raw_Bronze_Silver_Pipeline.ipynb  <- Ingestion, Bronze creation & Silver cleansing
+└── gold/
+    └── 02_Gold_Layer_Analytics.ipynb    <- Star-schema dimensions, facts & business KPI marts
+```
+
+### Notebook 1: `notebooks/01_Raw_Bronze_Silver_Pipeline.ipynb` (1.24 MB, 193 Cells)
+- **Scope:** Raw volume verification, Bronze ingestion, and Silver layer transformations.
+- **Key Operations:**
+  - Connects to `/Volumes/workspace/default/shoppulse_raw/`.
+  - Audits raw files and verifies multi-line review parsing.
+  - Creates 12 append-only Bronze Delta tables in `workspace.default`.
+  - Cleanses, deduplicates, casts types, and enforces relational integrity into `workspace.silver`.
+  - Saved outputs document complete row-count parity and validation assertions.
+
+### Notebook 2: `notebooks/gold/02_Gold_Layer_Analytics.ipynb` (10.43 MB, 116 Cells)
+- **Scope:** Star-schema dimensional modeling, fact table engineering, customer RFM profiling, and KPI calculation.
+- **Key Operations:**
+  - Builds Gold dimensions (`dim_date`, `dim_products`, `dim_sellers`, `dim_customers`, `dim_geolocation`).
+  - Constructs granular fact tables (`fact_sales`, `fact_payments`, `fact_reviews`, `fact_marketing_conversion`, `fact_orders`).
+  - Aggregates analytical marts (`kpi_executive_summary`, `kpi_monthly_sales`, `kpi_monthly_delivery`, `agg_customer_behavior`, `kpi_customer_segments`).
+  - Saved outputs document live query executions and KPI verification results.
+
+> **Execution Sequence:**  
+> The notebooks are designed for Databricks Serverless or All-Purpose Compute (Runtime 14.3+ LTS). They must be executed **sequentially**:
+> 1. Run `notebooks/01_Raw_Bronze_Silver_Pipeline.ipynb` to establish the raw storage mounts and populate `workspace.default` and `workspace.silver`.
+> 2. Run `notebooks/gold/02_Gold_Layer_Analytics.ipynb` to process the Silver Delta tables and generate `workspace.gold`.
+
+---
+
+## 7. ETL Workflow & Data Pipeline
 
 1. **Extraction:** `src/extraction/api_extract_holidays.py` queries the Nager.Date REST API for years 2016–2018, writing structured JSON payloads and consolidated CSVs to `data/raw/`.
-2. **Pre-Flight Validation:** `src/extraction/validate_raw_files.py` verifies record counts, delimiter integrity, and null profiles against defined thresholds.
-3. **Volume Ingestion:** Files are staged into Databricks Unity Catalog Volume `/Volumes/workspace/default/shoppulse_raw/`.
-4. **PySpark Notebook Execution:** Databricks notebooks execute the sequential transformations, writing partitioned Delta tables into the `gold` database schema.
+2. **Pre-Flight Validation:** `src/extraction/validate_raw_files.py` verifies record counts, delimiter integrity, and null profiles across all source files.
+3. **Volume Ingestion:** Source files are staged into Databricks Unity Catalog Volume `/Volumes/workspace/default/shoppulse_raw/`.
+4. **PySpark Pipeline Execution:** Databricks notebooks execute the sequential transformations, writing partitioned Delta tables into schemas `workspace.default`, `workspace.silver`, and `workspace.gold`.
 5. **Power BI Ingestion:** Power BI connects to the Databricks SQL Warehouse to ingest Gold tables and compute downstream business metrics.
 
 ---
 
-## 7. Power BI Executive Dashboard
+## 8. Power BI Executive Dashboard
 
-The production dashboard (`powerbi/ShopPulse_Dashboard.pbix`) consists of four structured pages:
+The production dashboard (`powerbi/ShopPulse_Dashboard.pbix` and `powerbi/Olist_Ecommerce_Intelligence.pbix`, 476 KB) consists of four structured pages:
 
 ### Page 1: Executive Overview
-- **Core Visuals:** High-level KPI summary cards (Total Orders, Net Product Sales, Freight Overhead, AOV), chronological monthly sales trend line chart, top-performing product categories bar chart, and payment method split.
+- **Core Visuals:** High-level KPI summary cards (Total Orders, Net Product Sales, Freight Overhead, Average Order Value), chronological monthly sales trend line chart, top-performing product categories bar chart, and payment method split.
 - **Interactive Slicers:** Year-Month chronological slicer with blank-safe filtering, and order status cross-filtering.
 
 ### Page 2: Sales and Product Analysis
@@ -170,89 +220,99 @@ The production dashboard (`powerbi/ShopPulse_Dashboard.pbix`) consists of four s
 
 ---
 
-## 8. Key Business Insights & Validated KPIs
+## 9. Key Business Insights & Validated KPIs
 
 All figures have been mathematically verified across Databricks PySpark and Power BI DAX:
 
-| Metric Category | Business Indicator | Validated Value | Note / Calculation |
+| Metric Category | Business Indicator | Validated Value | Note / Calculation Formula |
 | :--- | :--- | :---: | :--- |
-| **Marketplace Scale** | Total Orders | **99,441** | Total orders across 2016–2018 |
-| | Total Order Items | **112,650** | Individual SKU items fulfilled |
-| | Unique Products | **32,951** | Catalog breadth across 71 categories |
-| | Active Sellers | **3,095** | Merchants fulfilling orders |
-| **Financial Performance** | Total Marketplace Revenue | **R$ 15,843,553.24** | Product GMV + Freight payments |
-| | Product Sales (Net GMV) | **R$ 13,591,643.70** | Excludes freight and surcharges |
+| **Marketplace Scale** | Total Registered Orders | **99,441** | All order lifecycle statuses in `olist_orders_dataset` / `fact_orders` |
+| | Orders with Items | **98,666** | Orders with fulfilled physical items in `fact_sales` (775 canceled/unavailable before item assignment) |
+| | Total Order Items | **112,650** | Individual SKU items fulfilled across all orders |
+| | Unique Products | **32,951** | Catalog breadth across 71 product categories |
+| | Active Sellers | **3,095** | Merchants fulfilling orders in marketplace directory |
+| **Financial Performance** | Total Marketplace Revenue | **R$ 15,843,553.24** | Product GMV (R$ 13,591,643.70) + Freight (R$ 2,251,909.54) |
+| | Product Sales (Net GMV) | **R$ 13,591,643.70** | Excludes shipping charges and carrier fees |
 | | Total Freight Value | **R$ 2,251,909.54** | Total shipping fees collected |
-| | Average Order Value (AOV) | **R$ 160.00** | Net sales per fulfilled order |
-| **Customer Intelligence** | Unique Purchasing Customers | **95,420** | Deduplicated customer entities |
-| | Average Spend per Customer | **R$ 166.04** | Total revenue / purchasing customers |
-| | Repeat Customer Rate | **3.05%** | Customers with $\ge 2$ completed orders |
-| **Logistics & Delivery** | Delivered Orders | **96,478** | Confirmed customer receipts |
-| | On-Time / Early Orders | **89,853** | Delivered on or before estimated date |
+| | **Average Order Value (AOV)** | **R$ 160.58** | $\frac{\text{Sales Including Freight (R\$ 15,843,553.24)}}{\text{Orders with Items (98,666)}} = \text{R\$ 160.58}$ (verified in `workspace.gold.kpi_executive_summary`) |
+| **Customer Intelligence** | Unique Purchasing Customers | **95,420** | Deduplicated customer entities (`customer_unique_id`) |
+| | Average Spend per Customer | **R$ 166.04** | Total revenue (R$ 15,843,553.24) / 95,420 unique purchasers |
+| | Repeat Customer Rate | **3.05%** | Customers with $\ge 2$ completed orders (2,913 repeat / 95,420 total) |
+| **Logistics & Delivery** | Delivered Orders | **96,478** | Confirmed customer delivery receipts |
+| | On-Time / Early Orders | **89,853** | Delivered on or before carrier estimated date |
 | | Late Delivery Orders | **6,533** | Delivered after estimated date |
-| | On-Time Delivery Rate | **93.13%** | On-time orders / delivered orders |
+| | On-Time Delivery Rate | **93.13%** | On-time orders (89,853) / delivered orders (96,478) |
 | | Average Review Rating | **4.09 / 5.00** | Across 99,224 customer reviews |
-| **Marketing Funnel** | Marketing Qualified Leads (MQLs) | **8,000** | Inbound seller leads captured |
-| | Closed Deals (Onboarded Sellers) | **842** | Signed marketplace merchants |
-| | Seller Conversion Rate | **10.53%** | Closed deals / total MQLs |
+| **Marketing Funnel** | Marketing Qualified Leads (MQLs) | **8,000** | Inbound seller leads captured via landing pages |
+| | Closed Deals (Onboarded Sellers) | **842** | Signed marketplace merchants (10.53% conversion rate) |
+| | Matched Active Sellers | **380** | Closed-deal sellers with active order fulfillment history |
+
+> **Note on Average Order Value (AOV):**  
+> In the executive Gold mart (`workspace.gold.kpi_executive_summary`), AOV is defined as total transaction value per fulfilled order: $\frac{\text{R\$ 15,843,553.24}}{98,666} = \text{R\$ 160.58}$. If evaluated against net product sales excluding freight, the ratio is $\frac{\text{R\$ 13,591,643.70}}{98,666} = \text{R\$ 137.75}$. If evaluated against all 99,441 registered orders (including orders without item assignments), the ratio is $\frac{\text{R\$ 15,843,553.24}}{99,441} = \text{R\$ 159.32}$.
 
 ---
 
-## 9. Repository Structure
+## 10. Repository Structure
 
 ```text
 ShopPulse-Olist-Ecommerce-Intelligence/
 │
-├── .env.example                     <- Environment configuration template
-├── .gitignore                       <- Strictly ignores secrets, large CSVs, and temp files
-├── README.md                        <- Master project documentation and architecture guide
-├── PROJECT_PLAN.md                  <- Project lifecycle and execution roadmap
-├── DATA_SOURCE_REGISTER.md          <- Verified schemas, join keys, and source licenses
-├── TEAM_RESPONSIBILITIES.md         <- Role assignments, workflow matrix, and defense guide
-├── ARCHITECTURE.md                  <- In-depth technical architecture and system design
-├── requirements.txt                 <- Python dependencies
+├── .env.example                                      <- Environment template (no secrets)
+├── .gitignore                                        <- Excludes secrets, large CSVs, and temp files
+├── README.md                                         <- Master project documentation and architecture guide
+├── PROJECT_PLAN.md                                   <- Project lifecycle, status, and execution roadmap
+├── DATA_SOURCE_REGISTER.md                           <- Verified schemas, join keys, and source licenses
+├── TEAM_RESPONSIBILITIES.md                          <- Role assignments, workflow matrix, and defense guide
+├── ARCHITECTURE.md                                   <- In-depth technical architecture and system design
+├── requirements.txt                                  <- Python dependencies
 │
 ├── 01_Raw_Data_Acces_Verification - Databricks.html  <- Exported Databricks verification notebook
+├── 01_Raw_Data_Acces_Verification - Databricks_files/
+│
+├── notebooks/
+│   ├── 01_Raw_Bronze_Silver_Pipeline.ipynb           <- Raw verification, Bronze Delta creation & Silver cleansing
+│   └── gold/
+│       └── 02_Gold_Layer_Analytics.ipynb             <- Gold dimensions, facts, customer RFM, marketing & KPIs
 │
 ├── data/
-│   ├── README.md                    <- Data documentation and external download guide
-│   ├── raw/                         <- Staging directory (.gitkeep)
-│   ├── processed/                   <- Intermediary directory (.gitkeep)
-│   └── gold_exports/                <- Gold marts export directory (.gitkeep)
+│   ├── README.md                                     <- Data documentation and external download guide
+│   ├── raw/                                          <- Staging directory (.gitkeep)
+│   ├── processed/                                    <- Intermediary directory (.gitkeep)
+│   └── gold_exports/                                 <- Gold marts export directory (.gitkeep)
 │
 ├── powerbi/
-│   ├── ShopPulse_Dashboard.pbix     <- Final production Power BI interactive dashboard (476 KB)
-│   ├── Olist_Ecommerce_Intelligence.pbix <- Primary Power BI report
-│   ├── build_dashboard.py           <- Automated Power BI layout generator
-│   ├── refine_dashboard.py          <- Visual refinement and container builder
-│   └── quality_check_dashboard.py   <- DAX measure and model quality audit suite
+│   ├── ShopPulse_Dashboard.pbix                      <- Final production Power BI interactive dashboard (476 KB)
+│   ├── Olist_Ecommerce_Intelligence.pbix              <- Primary Power BI report (identical verified hash)
+│   ├── build_dashboard.py                            <- Automated Power BI layout generator
+│   ├── refine_dashboard.py                           <- Visual refinement and container builder
+│   └── quality_check_dashboard.py                    <- DAX measure and model quality audit suite
 │
 ├── src/
 │   ├── extraction/
-│   │   ├── api_extract_holidays.py  <- Ingests Brazilian national holidays via REST API
-│   │   ├── validate_raw_files.py    <- Validates schemas and counts of raw files
-│   │   └── secondary_audit.py       <- Audits cross-table foreign key relationships
+│   │   ├── api_extract_holidays.py                   <- Ingests Brazilian national holidays via REST API
+│   │   ├── validate_raw_files.py                     <- Validates schemas and counts of raw files
+│   │   └── secondary_audit.py                        <- Audits cross-table foreign key relationships
 │   │
 │   └── utils/
-│       ├── config.py                <- Configuration and path resolver
-│       └── logger.py                <- Structured execution logging utility
+│       ├── config.py                                 <- Configuration and path resolver
+│       └── logger.py                                 <- Structured execution logging utility
 │
 └── docs/
-    ├── DATA_VALIDATION_REPORT.md    <- Pre-ingestion file audit and record validation
-    ├── PHASE_1A_SECONDARY_AUDIT.md  <- Relational integrity and null checks
-    ├── PHASE_1B_API_EXTRACTION_REPORT.md <- Holiday API response validation
-    └── PHASE_1C_DATABRICKS_ACCESS_REPORT.md <- Unity Catalog volume access report
+    ├── DATA_VALIDATION_REPORT.md                     <- Pre-ingestion file audit and record validation
+    ├── PHASE_1A_SECONDARY_AUDIT.md                   <- Relational integrity and null checks
+    ├── PHASE_1B_API_EXTRACTION_REPORT.md             <- Holiday API response validation
+    └── PHASE_1C_DATABRICKS_ACCESS_REPORT.md          <- Unity Catalog volume access report
 ```
 
 ---
 
-## 10. Setup and Execution Instructions
+## 11. Setup and Execution Instructions
 
 ### Prerequisites
 - Python 3.10+ (Python 3.12 recommended)
 - Git 2.40+
 - Microsoft Power BI Desktop (Latest version)
-- Databricks Workspace (Serverless or All-Purpose Compute with Unity Catalog)
+- Databricks Workspace (Serverless or All-Purpose Compute with Unity Catalog enabled)
 
 ### Step 1: Clone Repository
 ```bash
@@ -269,31 +329,31 @@ python -m venv venv
 # Install required dependencies
 pip install -r requirements.txt
 
-# Create local environment config
+# Create local environment config from template
 Copy-Item .env.example .env
 ```
 
-### Step 3: Run Public Holiday Extraction
+### Step 3: Run Public Holiday Extraction & Validation
 ```bash
 python src/extraction/api_extract_holidays.py
-```
-
-### Step 4: Validate Raw Datasets
-```bash
 python src/extraction/validate_raw_files.py
 ```
 
-### Step 5: Databricks Ingestion & Execution
+### Step 4: Databricks Ingestion & Execution
 1. Create a Managed Volume inside Databricks: `/Volumes/workspace/default/shoppulse_raw/`.
 2. Upload the raw CSV and JSON files into the Volume.
-3. Execute the Bronze, Silver, and Gold transformations to populate Delta tables.
+3. Import the notebooks into your Databricks workspace:
+   - Import `notebooks/01_Raw_Bronze_Silver_Pipeline.ipynb`.
+   - Import `notebooks/gold/02_Gold_Layer_Analytics.ipynb`.
+4. Run `01_Raw_Bronze_Silver_Pipeline.ipynb` to establish Bronze Delta tables in `workspace.default` and Silver Delta tables in `workspace.silver`.
+5. Run `02_Gold_Layer_Analytics.ipynb` to generate Gold dimensions, fact tables, and KPI marts in `workspace.gold`.
 
-### Step 6: Power BI Reporting
-Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The report connects directly to the Databricks SQL Warehouse to refresh and query live data.
+### Step 5: Power BI Reporting
+Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The report connects directly to the Databricks SQL Warehouse (Port 443) to refresh and query live data.
 
 ---
 
-## 11. Limitations & Future Enhancements
+## 12. Limitations & Future Enhancements
 
 - **Geographic Representation:** Geolocation coordinate files contain multiple zip-code prefix duplicates; implementing geospatial polygon clustering with H3 indexing would enhance spatial precision.
 - **Streaming Ingestion:** Current pipeline runs in scheduled batch micro-batches; migrating to Databricks Delta Live Tables (DLT) with Auto Loader would enable near real-time streaming ingestion.
@@ -301,7 +361,7 @@ Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The repor
 
 ---
 
-## 12. Contributors & Attribution
+## 13. Contributors & Attribution
 
 - **Pratyush Pratim Thakur** ([@pratyush-max](https://github.com/pratyush-max)) — Project Lead, Architecture, Data Engineering & BI Development
 - **ShopPulse Engineering Team** — B.Tech Computer Science & Engineering (AI & ML)
