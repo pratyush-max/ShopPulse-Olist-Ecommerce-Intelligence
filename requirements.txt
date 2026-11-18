@@ -1,0 +1,17 @@
+# ==============================================================================
+# ShopPulse: Phase 1 Minimal Python Dependencies
+# ==============================================================================
+# Recommended Python Version: Python 3.12 (Python 3.12.5)
+# Note: PySpark and Delta Lake run directly on Databricks cloud clusters,
+# so heavy Spark/Hadoop binaries are NOT required on your local Windows PC.
+# ==============================================================================
+
+# REST API Ingestion
+requests>=2.31.0,<3.0.0
+
+# Environment Variable Management
+python-dotenv>=1.0.0,<2.0.0
+
+# Local CSV/JSON Schema & Data Validation
+pandas>=2.2.0,<3.0.0
+

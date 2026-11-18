@@ -1,0 +1,78 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables & Secrets
+.env
+.env.local
+kaggle.json
+databricks_token.txt
+*.pem
+*.key
+
+# Data Files (Keep large raw and intermediate data out of Git)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/gold_exports/*
+!data/gold_exports/.gitkeep
+*.csv
+*.json
+*.parquet
+*.zip
+*.tar.gz
+
+# Delta Lake Metadata & Parquet logs generated locally
+_delta_log/
+*.checkpoint.parquet
+
+# Power BI Local Working Files and auto-recovery caches
+*.pbix
+*.tmp
+# Keep finalized project dashboard PBIX files
+!powerbi/ShopPulse_Dashboard.pbix
+!powerbi/Olist_Ecommerce_Intelligence.pbix
+!powerbi/*.pbit
+
+# Power BI diagnostic, scratch, and repair scripts
+powerbi/check_*
+powerbi/compare_*
+powerbi/diff_*
+powerbi/find_*
+powerbi/inspect_*
+powerbi/print_*
+powerbi/read_*
+powerbi/refresh_*
+powerbi/repair_*
+powerbi/test_*
+powerbi/query_*
+powerbi/validate_*
+powerbi/verify_*
+powerbi/recovered_*
+powerbi/*_backup_*
+powerbi/qc_*
+pbix_diag/
+extract_notebook_html.py
+search_html.py
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
