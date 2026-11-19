@@ -100,14 +100,16 @@ We performed set intersections across the three tables containing `seller_id`:
 - **Closed Deals ∩ Order Items:** Exactly **380** sellers.
 - **Sellers Directory ∩ Order Items:** Exactly **3,095** sellers (100% overlap).
 
-### Academic Explanation for Professor & Viva Defense:
-1. **Why do only 380 of the 842 closed deal sellers appear in the main marketplace dataset?**  
-   - The Marketing Funnel dataset spans June 2017 to June 2018. Many deals were signed toward the end of that observation window and had not yet completed merchant onboarding, catalog listing, or technical integration before the transactional order dataset snapshot was frozen.
-   - Some sellers signed contracts but never listed items, or fulfilled orders on Olist channels outside this dataset.
-2. **Why do 2,715 marketplace sellers not exist in the marketing funnel?**  
-   - Olist was founded in 2015. Over 80% of its merchant base joined prior to June 2017 or were recruited via direct outbound enterprise sales, partner networks, and offline merchant acquisition rather than inbound web forms.
+### Hypotheses & Explanations Documented in Audit:
+1. **Unmatched Closed Deals (462 sellers):**  
+   - Out of 842 closed deals, exactly 380 have active sales in the transaction dataset. For the remaining 462 sellers, potential operational explanations include:
+     - *Onboarding / Timing Lag:* Deals signed near the conclusion of the funnel observation window (June 2017 – June 2018) may not have finalized catalog listings or completed initial order fulfillment before the transactional data export.
+     - *Contract Inactivity:* Merchants who signed partnership agreements but did not actively list inventory or fulfill transactions on the marketplace during the tracked snapshot.
+     - *Alternative Platforms:* Sellers whose sales were processed through channels outside this specific transactional snapshot.
+2. **Non-Funnel Marketplace Merchants (2,715 sellers):**  
+   - 2,715 of the 3,095 active marketplace sellers do not originate from this inbound marketing funnel dataset, indicating that the majority of marketplace sellers joined outside this tracked inbound cohort (e.g., prior to June 2017 or through alternative merchant acquisition channels).
 3. **Conclusion for Silver/Gold ETL:**  
-   - In our Silver/Gold layer, we will model marketing attribution specifically on this authentic cohort of 380 active sellers. We will **never** generate synthetic sellers or force artificial joins.
+   - In our Silver/Gold layer, we model marketing attribution specifically on the authentic cohort of 380 active sellers. We will **never** generate synthetic sellers or force artificial joins.
 
 ---
 

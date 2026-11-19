@@ -9,9 +9,12 @@
 
 | Source ID | Source Name | Nature / Format | Provider / Platform | License | Verified Date Range |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **SRC-01** | Olist Brazilian E-Commerce Dataset | 9 Normalized Relational CSV Tables | Olist / Kaggle | CC BY-NC-SA 4.0 | Sep 2016 – Oct 2018 |
-| **SRC-02** | Olist Marketing Funnel Dataset | 2 Relational CSV Tables | Olist / Kaggle | CC BY-NC-SA 4.0 | Jun 2017 – Jun 2018 |
-| **SRC-03** | Nager.Date Public Holidays API | RESTful JSON API | Nager.Date (Open Source) | MIT / Public Domain | 2016 – 2018 (Relevant Years) |
+| **SRC-01** | Olist Brazilian E-Commerce Dataset | 9 Normalized Relational CSV Tables | Olist (via Kaggle) | CC BY-NC-SA 4.0 | Sep 2016 – Oct 2018 |
+| **SRC-02** | Olist Marketing Funnel Dataset | 2 Relational CSV Tables | Olist (via Kaggle) | CC BY-NC-SA 4.0 | Jun 2017 – Jun 2018 |
+| **SRC-03** | Nager.Date Public Holidays API | RESTful JSON API | Nager.Date (External REST Service) | Open API (Verify before submission) | 2016 – 2018 (Relevant Years) |
+
+> **Provider Architecture Note:**  
+> The two Olist datasets (SRC-01 and SRC-02) originate from the same organization (Olist) published via Kaggle, representing separate analytical assets from their e-commerce store operations and seller marketing pipeline. Nager.Date (SRC-03) provides external calendar context.
 
 ---
 
@@ -132,7 +135,7 @@
 - **Source URL:** [https://date.nager.at/api/v3/PublicHolidays/{Year}/BR](https://date.nager.at/api/v3/PublicHolidays/{Year}/BR)
 - **Retrieval Method:** Automated Python HTTP GET requests
 - **Date Accessed:** 12 November 2026
-- **Applicable License:** Public Domain / Open Source
+- **Applicable License:** Open REST API (Verify before submission)
 - **Authentication:** None required (completely open API)
 - **Target Years:** 2016, 2017, 2018 (spanning the active Olist purchase dates)
 
@@ -185,8 +188,8 @@ erDiagram
    - Total Closed Deals won: **842** (each with a unique `mql_id` and unique `seller_id`, giving a lead conversion rate of 10.53%).
    - **Seller Overlap Verification (Audited in Phase 1A):**
      - Out of the 842 closed deals, exactly **380 sellers** match the registered merchant directory (`olist_sellers_dataset.csv`) and also have active sales records in `olist_order_items_dataset.csv`.
-     - The remaining **462 closed-deal sellers** do not appear in the transaction tables because their contracts were finalized near the end of the observation window (June 2017 – June 2018) or prior to completing catalog onboarding and first order fulfillment.
-     - Out of 3,095 total marketplace sellers, 2,715 joined through channels prior to the marketing funnel tracking period or via direct outbound acquisition.
+     - The remaining **462 closed-deal sellers** do not have matching transaction records in the marketplace dataset. Possible operational explanations documented in the Phase 1A audit include: seller onboarding lag (contracts signed near the end of the funnel tracking period without catalog listing completion during the order snapshot), sellers who signed contracts but never fulfilled orders on the marketplace, or sales channeled through platforms outside this dataset.
+     - Conversely, 2,715 of the 3,095 total marketplace sellers do not originate from this inbound marketing funnel dataset, representing merchants onboarded outside this tracked cohort.
    - **Crucial Rule:** We do NOT invent synthetic sellers or force artificial joins. In Silver/Gold ETL, marketing conversion is modeled on the authentic cohort of 842 closed deals, and sales attribution is linked specifically to the 380 active selling merchants.
 
 4. **Holiday Impact Relationship:**

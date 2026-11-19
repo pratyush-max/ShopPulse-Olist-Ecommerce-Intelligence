@@ -5,7 +5,6 @@
 [![Databricks](https://img.shields.io/badge/Databricks-Runtime%2014.3%20LTS-red.svg)](https://databricks.com/)
 [![Delta Lake](https://img.shields.io/badge/Delta%20Lake-ACID%20Storage-00ADD8.svg)](https://delta.io/)
 [![Power BI](https://img.shields.io/badge/Power%20BI-Desktop%20Interactive-F2C811.svg)](https://powerbi.microsoft.com/)
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 An enterprise-grade, end-to-end Big Data Engineering and Business Intelligence platform built on the Brazilian Olist E-Commerce dataset. **ShopPulse** leverages Databricks and PySpark to implement a Medallion Architecture (Bronze, Silver, and Gold Delta Lake layers) integrated with an external public holidays REST API, culminating in an interactive four-page Microsoft Power BI executive dashboard.
 
@@ -32,7 +31,7 @@ An enterprise-grade, end-to-end Big Data Engineering and Business Intelligence p
 - [11. Repository Structure](#11-repository-structure)
 - [12. Setup and Execution Instructions](#12-setup-and-execution-instructions)
 - [13. Limitations & Future Enhancements](#13-limitations--future-enhancements)
-- [14. Contributors & Attribution](#14-contributors--attribution)
+- [14. Team, Acknowledgements & Attribution](#14-team-acknowledgements--attribution)
 
 ---
 
@@ -69,7 +68,8 @@ The platform integrates two Kaggle open datasets alongside a live external REST 
 | **Olist Marketing Funnel** | [Kaggle Marketing Funnel](https://www.kaggle.com/datasets/olistbr/marketing-funnel-olist) | 8,000 Leads | 2 tables: Marketing Qualified Leads (MQLs) and Closed Deals (842 seller wins). |
 | **Brazilian Public Holidays** | [Nager.Date REST API](https://date.nager.at/) | 42 Holidays | Statutory and bank holidays across Brazil for 2016, 2017, and 2018. |
 
-*Licensing:* Datasets are published under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)** license.
+*Provider Note:* The Olist Brazilian E-Commerce dataset and the Olist Marketing Funnel dataset are separate analytical assets provided by the same source organization (Olist).  
+*Dataset Licensing:* The Olist datasets are published on Kaggle under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)** license. For the Nager.Date Public Holidays API, verify specific data reuse terms before formal submission.
 
 ---
 
@@ -174,12 +174,12 @@ notebooks/
   - Cleanses, deduplicates, casts types, and enforces relational integrity into `workspace.silver`.
   - Saved outputs document complete row-count parity and validation assertions.
 
-### Notebook 2: `notebooks/gold/02_Gold_Layer_Analytics.ipynb` (10.43 MB, 116 Cells)
-- **Scope:** Star-schema dimensional modeling, fact table engineering, customer RFM profiling, and KPI calculation.
+### Notebook 2: `notebooks/gold/02_Gold_Layer_Analytics.ipynb` (10.42 MB, 114 Cells)
+- **Scope:** Star-schema dimensional modeling, fact table engineering, customer RFM profiling, and KPI calculation across 25 Gold tables.
 - **Key Operations:**
-  - Builds Gold dimensions (`dim_date`, `dim_products`, `dim_sellers`, `dim_customers`, `dim_geolocation`).
-  - Constructs granular fact tables (`fact_sales`, `fact_payments`, `fact_reviews`, `fact_marketing_conversion`, `fact_orders`).
-  - Aggregates analytical marts (`kpi_executive_summary`, `kpi_monthly_sales`, `kpi_monthly_delivery`, `agg_customer_behavior`, `kpi_customer_segments`).
+  - Builds 5 Gold dimensions (`dim_date`, `dim_products`, `dim_sellers`, `dim_customers`, `dim_geolocation`).
+  - Constructs 5 granular fact tables (`fact_sales`, `fact_payments`, `fact_reviews`, `fact_marketing_conversion`, `fact_orders`).
+  - Aggregates 14 analytical KPI marts (`kpi_executive_summary`, `kpi_monthly_sales`, `kpi_monthly_payments`, `kpi_sales_by_category`, `kpi_top_10_categories`, `kpi_sales_by_state`, `kpi_sales_by_seller_state`, `kpi_monthly_delivery`, `kpi_monthly_marketing`, `kpi_monthly_reviews`, `kpi_reviews_by_state`, `agg_customer_behavior`, `kpi_customer_segments`, `kpi_monthly_customer_acquisition`) and 1 audit table (`geolocation_location_audit`).
   - Saved outputs document live query executions and KPI verification results.
 
 > **Execution Sequence:**  
@@ -229,7 +229,7 @@ All figures have been mathematically verified across Databricks PySpark and Powe
 | :--- | :--- | :---: | :--- |
 | **Marketplace Scale** | Total Registered Orders | **99,441** | All order lifecycle statuses in `olist_orders_dataset` / `fact_orders` |
 | | Orders with Items | **98,666** | Orders represented in `fact_sales` (775 registered orders do not have corresponding order-item records in the transaction dataset) |
-| | Total Order Items | **112,650** | Individual SKU items fulfilled across all orders |
+| | Total Order Items | **112,650** | Individual SKU items fulfilled across all orders (`fact_sales` contains 112,650 order-item rows for 98,666 distinct orders) |
 | | Unique Products | **32,951** | Catalog breadth across 71 product categories |
 | | Active Sellers | **3,095** | Merchants fulfilling orders in marketplace directory |
 | **Financial Performance** | Total Marketplace Revenue | **R$ 15,843,553.24** | Product GMV (R$ 13,591,643.70) + Freight (R$ 2,251,909.54) |
@@ -242,7 +242,8 @@ All figures have been mathematically verified across Databricks PySpark and Powe
 | **Logistics & Delivery** | Delivered Orders | **96,478** | Confirmed customer delivery receipts |
 | | On-Time / Early Orders | **89,853** | Delivered on or before carrier estimated date |
 | | Late Delivery Orders | **6,533** | Delivered after estimated date |
-| | On-Time Delivery Rate | **93.13%** | On-time orders (89,853) / delivered orders (96,478) |
+| | Unknown Delivery Dates | **92** | Orders marked `delivered` with unrecorded customer delivery timestamp |
+| | On-Time Delivery Rate | **93.13%** | On-time orders (89,853) / delivered orders (96,478) (92 unknown delivery records tracked separately) |
 | | Average Review Rating | **4.09 / 5.00** | Across 99,224 customer reviews |
 | **Marketing Funnel** | Marketing Qualified Leads (MQLs) | **8,000** | Inbound seller leads captured via landing pages |
 | | Closed Deals (Onboarded Sellers) | **842** | Signed marketplace merchants (10.53% conversion rate) |
@@ -384,11 +385,25 @@ Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The repor
 
 ---
 
-## 14. Contributors & Attribution
+## 14. Team, Acknowledgements & Attribution
 
-- **Pratyush Pratim Thakur** ([@pratyush-max](https://github.com/pratyush-max)) — Project Lead, Architecture, Data Engineering & BI Development
-- **ShopPulse Engineering Team** — B.Tech Computer Science & Engineering (AI & ML)
+### Project Team
+- **Pratyush Pratim Thakur** ([@pratyush-max](https://github.com/pratyush-max)) — Team Lead
+  - *Responsibilities:* [Placeholder — To be finalized by team: Overall Architecture, Project Lead, Lakehouse Orchestration, Repository Management]
+- **Anuj** — Team Member
+  - *Responsibilities:* [Placeholder — To be finalized by team: Data Engineering, Pipeline Implementation, Ingestion & Quality Auditing]
+- **Chirag** — Team Member
+  - *Responsibilities:* [Placeholder — To be finalized by team: Business Intelligence, Dashboard Analytics, DAX Modeling, Documentation]
 
-### Dataset Citations
-- *Olist Brazilian E-Commerce & Marketing Funnel:* Provided by Olist and André Sionek on [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) under CC BY-NC-SA 4.0.
-- *Public Holidays API:* Provided by [Nager.Date](https://date.nager.at/) under open REST access.
+### Technology & Tool Acknowledgements
+The team acknowledges the open-source software, cloud platforms, and developer tools that made this project possible:
+- **Python** (Python Software Foundation) — Primary data extraction and validation scripting language.
+- **Apache Spark & PySpark** (Apache Software Foundation) — Distributed compute and large-scale data processing engine.
+- **Delta Lake** (Linux Foundation) — ACID transaction layer, time travel, and lakehouse storage format.
+- **Databricks** — Unified Lakehouse platform and serverless Spark compute environment.
+- **Microsoft Power BI** — Interactive enterprise business intelligence, semantic modeling, and DAX analytics.
+- **Git & GitHub** — Distributed version control and collaboration platform.
+
+### Dataset Citations & Licensing
+- **Olist Brazilian E-Commerce & Marketing Funnel Datasets:** Provided by Olist and André Sionek on [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) license. Both datasets originate from the same provider organization (Olist).
+- **Brazilian Public Holidays API:** Provided by [Nager.Date](https://date.nager.at/) under open REST API access (verify before submission).

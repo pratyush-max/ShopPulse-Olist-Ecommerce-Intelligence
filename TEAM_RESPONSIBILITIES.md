@@ -1,85 +1,66 @@
-# ShopPulse: Team Member Responsibility Matrix & Viva Defense Guide
+# ShopPulse: Team Member Responsibility Matrix & Defense Guide
 
 > **Project Title:** ShopPulse – An End-to-End E-Commerce Customer Behaviour, Sales and Delivery Intelligence Platform  
-> **Team Composition:** 4 Members (Modularly adjustable to 3)  
-> **Mandatory Criterion:** While each member leads a specific module, all members must possess a comprehensive understanding of the complete end-to-end data pipeline.
+> **Team Composition:** 3 Members  
+> **Mandatory Criterion:** While individual members focus on specific project modules, all members maintain a comprehensive understanding of the entire end-to-end data pipeline.
 
 ---
 
 ## 1. Team Allocation Matrix
 
-| Role ID | Role Title | Core Responsibilities | Assigned Member |
-| :--- | :--- | :--- | :--- |
-| **LEAD-01** | **Project Architect & Integration Lead** | Architecture design, Databricks cluster management, Git repository orchestration, overall quality assurance, pipeline coordination | `[Student Name 1 - Team Leader]` *(Requires confirmation)* |
-| **DATA-02** | **Data Ingestion & Storage Engineer** | REST API extraction script (`src/extraction`), dataset collection, schema validation, Databricks Unity Catalog Volume / DBFS raw upload | `[Student Name 2]` *(Requires confirmation)* |
-| **SPARK-03** | **Big Data & PySpark ETL Engineer** | Databricks PySpark development, Medallion Architecture implementation (Bronze, Silver, Gold Delta tables), business logic & KPI calculations | `[Student Name 3]` *(Requires confirmation)* |
-| **BI-04** | **BI Developer & Documentation Specialist** | Power BI dashboard development, DAX measures, data validation tests, academic project report, and presentation slide deck | `[Student Name 4]` *(Requires confirmation)* |
-
-> **Note on Team Assignments:**  
-> The team member names bracketed above (`[Student Name 1-4]`) are placeholders that must be finalized by the project group prior to submission. *(Note: If working as a 3-member team, responsibilities for **BI-04** are divided between **LEAD-01** and **SPARK-03**).*
+| Team Member | Role Title | Module Ownership / Core Responsibilities |
+| :--- | :--- | :--- |
+| **Pratyush** | **Team Lead** | *[Placeholder — To be finalized by team: Overall Architecture, Project Lead, Lakehouse Orchestration, Repository Management]* |
+| **Anuj** | **Team Member** | *[Placeholder — To be finalized by team: Data Engineering, Pipeline Implementation, Ingestion & Quality Auditing]* |
+| **Chirag** | **Team Member** | *[Placeholder — To be finalized by team: Business Intelligence, Dashboard Analytics, DAX Modeling, Documentation]* |
 
 ---
 
-## 2. Granular Task Breakdown by Role
+## 2. Granular Task Breakdown by Module
 
-### Role 1: Project Architect & Integration Lead (`[Student Name 1]`)
+### Module A: Project Architecture & Lakehouse Governance
 - **Primary Deliverables:**
-  - `README.md`, `ARCHITECTURE.md`, `PROJECT_PLAN.md`.
-  - Setting up Git repository, branching rules, `.gitignore`, and `.env.example`.
-  - Creating and configuring Databricks workspace (compute clusters, runtime selection, Unity Catalog / DBFS).
-  - Monitoring end-to-end milestone completion from 12 Nov to 20 Nov.
-- **Viva Defense Topics to Master:**
-  - Why choose Databricks and Delta Lake over traditional PostgreSQL or Hadoop HDFS?
-  - What are ACID transactions in Delta Lake, and how does the `_delta_log` work?
-  - How does Unity Catalog provide governance and lineage across the lakehouse?
+  - Repository architecture, Git workflow, `.gitignore`, and `.env.example`.
+  - Databricks workspace configuration, Unity Catalog Volumes (`/Volumes/workspace/default/shoppulse_raw/`), and schema management (`workspace.default`, `workspace.silver`, `workspace.gold`).
+  - System architecture documentation (`ARCHITECTURE.md`, `PROJECT_PLAN.md`).
+- **Defense Topics:**
+  - Why choose Databricks and Delta Lake over traditional RDBMS or raw cloud storage?
+  - How ACID transactions and the Delta transaction log (`_delta_log`) maintain data consistency.
+  - How Unity Catalog manages governance, volumes, and cross-layer lineage.
 
-### Role 2: Data Ingestion & Storage Engineer (`[Student Name 2]`)
+### Module B: Data Extraction, Ingestion & Medallion Engineering
 - **Primary Deliverables:**
-  - `src/extraction/api_extract_holidays.py` (fetching Brazilian public holidays via Nager.Date API).
-  - Downloading and verifying the 9 Olist e-commerce tables and 2 marketing funnel tables.
-  - Pre-ingestion validation scripts (`src/extraction/validate_raw_files.py`).
-  - Loading raw files into Databricks cloud/object storage (Unity Catalog Volume or DBFS).
-- **Viva Defense Topics to Master:**
-  - How does the API extraction script handle network retries, timeouts, and JSON parsing?
-  - What is the difference between structured CSV data and semi-structured API JSON?
-  - Why do we store immutable raw files in object storage before processing them in Spark?
+  - REST API extraction of Brazilian statutory holidays (`src/extraction/api_extract_holidays.py`).
+  - Pre-flight schema validation and relational audits (`src/extraction/validate_raw_files.py`, `src/extraction/secondary_audit.py`).
+  - Databricks Notebook 1: `notebooks/01_Raw_Bronze_Silver_Pipeline.ipynb` (Raw verification, 12 Bronze Delta tables, 11 Silver cleansed/enriched tables).
+  - Databricks Notebook 2: `notebooks/gold/02_Gold_Layer_Analytics.ipynb` (Star-schema Gold dimensional models, fact tables, customer RFM marts, and business KPI aggregates).
+- **Defense Topics:**
+  - How the REST API extraction script handles network retries, timeouts, and JSON parsing.
+  - PySpark transformations: type casting, multi-line CSV handling, deduplication, and window functions.
+  - Medallion Architecture progression (Bronze append-only $\rightarrow$ Silver validated $\rightarrow$ Gold curated marts).
 
-### Role 3: Big Data & PySpark ETL Engineer (`[Student Name 3]`)
+### Module C: Business Intelligence & Analytical Serving
 - **Primary Deliverables:**
-  - Databricks Notebook 01: `01_bronze_ingestion.py` (Raw $\rightarrow$ Bronze Delta).
-  - Databricks Notebook 02: `02_silver_transformation.py` (Bronze $\rightarrow$ Silver Delta with cleaning).
-  - Databricks Notebook 03: `03_gold_business_aggregates.py` (Silver $\rightarrow$ Gold business marts).
-  - Implementing data deduplication, timestamp casting, and verified joins.
-- **Viva Defense Topics to Master:**
-  - What is lazy evaluation in Apache Spark (Transformations vs Actions)?
-  - How do you resolve skewed joins and optimise queries when joining 100k+ rows in PySpark?
-  - How are the business KPIs calculated (e.g., AOV, Delivery Delay %, Seller Lead Conversion Rate)?
-
-### Role 4: BI Developer & Documentation Specialist (`[Student Name 4]`)
-- **Primary Deliverables:**
-  - Interactive Microsoft Power BI dashboard (4 executive reporting pages: Executive Overview, Sales and Product Analysis, Customer Intelligence, Marketing and Operations).
-  - Data modeling in Power BI (Star Schema with 1:Many relationships).
-  - DAX measures documented in `powerbi/dax_measures.md`.
-  - Academic project report (`docs/project_report.md`) and slide deck (`docs/presentation_outline.md`).
-  - Automated validation tests in `tests/test_data_integrity.py`.
-- **Viva Defense Topics to Master:**
-  - How does Power BI connect to Databricks (DirectQuery vs Import Mode)?
-  - What is the difference between a calculated column and a DAX measure in Power BI?
-  - How does your dashboard help an e-commerce executive make operational and logistics decisions?
+  - Production Microsoft Power BI dashboard (`powerbi/ShopPulse_Dashboard.pbix` and `powerbi/Olist_Ecommerce_Intelligence.pbix`).
+  - 4 Executive reporting pages:
+    1. Executive Overview & Marketplace Performance
+    2. Sales, Product Category & Geographic Intelligence
+    3. Customer Intelligence & Retention Dynamics
+    4. Marketing Funnel & Operational Delivery Performance
+  - Star schema data model connected directly to Databricks SQL Warehouse (Port 443).
+  - Validated DAX measures aligned with Lakehouse KPI aggregates.
+- **Defense Topics:**
+  - How Power BI connects to Databricks SQL Warehouse (DirectQuery / Import mode).
+  - Star schema design: 1:Many relationships, role-playing date dimensions, and bidirectional filtering control.
+  - Reconciliation between Gold layer SQL metrics and Power BI visual aggregations (e.g., AOV of R$ 160.58).
 
 ---
 
-## 3. Team Collaboration & Daily Check-in Protocol
+## 3. Team Collaboration Protocol
 
-To prevent last-minute delays:
-1. **Daily 10-Minute Standup:** Every morning at 10:00 AM, each member answers:
-   - What did you accomplish yesterday?
-   - What is your deliverable for today?
-   - Is anything blocking your progress?
+1. **Sprint Coordination:** Daily coordination during active milestones to track blockers, pipeline outputs, and visual design alignments.
 2. **Git Workflow:**
-   - No direct commits of unverified code to `main`.
-   - Feature branches (e.g., `feature/api-extraction`, `feature/silver-cleaning`).
-   - Integration lead reviews and merges into `main` after running tests.
-3. **Shared Knowledge Session (Day 8):**
-   - The team conducts a mock viva session where members ask each other cross-functional questions to guarantee zero weak links.
-
+   - Feature-specific updates with explicit file staging.
+   - Synchronized commits with descriptive messages.
+3. **Cross-Functional Knowledge Transfer:**
+   - Joint verification of the 25 Gold tables and 4-page Power BI dashboard to ensure all members are prepared for defense and presentation.

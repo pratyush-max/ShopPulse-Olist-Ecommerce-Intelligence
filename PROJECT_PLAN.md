@@ -89,12 +89,12 @@ flowchart TD
 - [x] Stage and upload 45 core project files (architecture, data registry, phase reports, Power BI dashboard, extraction scripts).
 - [x] Upload original execution notebooks:
   - `notebooks/01_Raw_Bronze_Silver_Pipeline.ipynb` (1.24 MB, 193 cells with outputs)
-  - `notebooks/gold/02_Gold_Layer_Analytics.ipynb` (10.43 MB, 116 cells with outputs)
+  - `notebooks/gold/02_Gold_Layer_Analytics.ipynb` (10.42 MB, 114 cells with outputs)
 - [x] Verify remote synchronization: both notebooks and all 47 files tracked live on `origin/main`.
 
 ### Day 8: Thursday, 19 November 2026
 **Milestone:** Phase 7 — Academic Report & Viva Presentation Preparation  
-**Status:** **PENDING SUBMISSION WORK ⏳**
+**Status:** **IN PROGRESS ⏳**
 - [ ] Draft `docs/project_report.md` structured according to college specifications:
   - Abstract & Problem Statement.
   - Literature Survey & Industrial Relevance.
@@ -103,7 +103,7 @@ flowchart TD
   - Results, KPI Interpretations & Power BI Dashboards.
   - Conclusion & Future Enhancements.
 - [ ] Prepare `docs/presentation_outline.md` (10–12 professional slides for the viva defense).
-- [ ] Collect and organize high-resolution dashboard screenshots in `docs/screenshots/`.
+- [x] Collect and organize high-resolution dashboard screenshots in `docs/screenshots/`.
 - [ ] Rehearse individual student speaking sections using `TEAM_RESPONSIBILITIES.md`.
 
 ### Day 9: Friday, 20 November 2026
