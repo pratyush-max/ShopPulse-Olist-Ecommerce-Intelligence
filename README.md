@@ -388,12 +388,22 @@ Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The repor
 ## 14. Team, Acknowledgements & Attribution
 
 ### Project Team
-- **Pratyush Pratim Thakur** ([@pratyush-max](https://github.com/pratyush-max)) — Team Lead
-  - *Responsibilities:* [Placeholder — To be finalized by team: Overall Architecture, Project Lead, Lakehouse Orchestration, Repository Management]
-- **Anuj** — Team Member
-  - *Responsibilities:* [Placeholder — To be finalized by team: Data Engineering, Pipeline Implementation, Ingestion & Quality Auditing]
-- **Chirag** — Team Member
-  - *Responsibilities:* [Placeholder — To be finalized by team: Business Intelligence, Dashboard Analytics, DAX Modeling, Documentation]
+
+The project is organized into three technical workstreams covering Architecture & Engineering Integration, Data Ingestion & Quality Engineering, and Gold Analytics & Business Intelligence.
+
+- **Pratyush Pratim Thakur** ([@pratyush-max](https://github.com/pratyush-max)) — Team Lead, Architecture & Engineering Integration
+  - Led the core hands-on implementation and end-to-end technical integration.
+  - Responsible for project architecture, Databricks configuration, Medallion pipeline integration, repository management and engineering decisions.
+
+- **Anuj** — Data Ingestion & Quality Engineering
+  - Assigned technical review and presentation ownership for source-data understanding, CSV/API ingestion workflow, Bronze and Silver processing, schema validation and data-quality auditing.
+  - Responsible for preparing and explaining the ingestion and data-quality modules during the project presentation and viva.
+
+- **Chirag** — Gold Analytics & Business Intelligence
+  - Assigned technical review and presentation ownership for Gold dimensions and facts, KPI interpretation, Power BI reporting, DAX measures and business insights.
+  - Responsible for preparing and explaining the analytics and dashboard modules during the project presentation and viva.
+
+All team members are expected to understand the complete end-to-end workflow and participate in the final project demonstration and viva.
 
 ### Technology & Tool Acknowledgements
 The team acknowledges the open-source software, cloud platforms, and developer tools that made this project possible:
