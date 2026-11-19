@@ -28,10 +28,11 @@ An enterprise-grade, end-to-end Big Data Engineering and Business Intelligence p
   - [Page 3: Customer Intelligence](#page-3-customer-intelligence)
   - [Page 4: Marketing and Operations](#page-4-marketing-and-operations)
 - [9. Key Business Insights & Validated KPIs](#9-key-business-insights--validated-kpis)
-- [10. Repository Structure](#10-repository-structure)
-- [11. Setup and Execution Instructions](#11-setup-and-execution-instructions)
-- [12. Limitations & Future Enhancements](#12-limitations--future-enhancements)
-- [13. Contributors & Attribution](#13-contributors--attribution)
+- [10. Pipeline & Dashboard Execution Evidence](#10-pipeline--dashboard-execution-evidence)
+- [11. Repository Structure](#11-repository-structure)
+- [12. Setup and Execution Instructions](#12-setup-and-execution-instructions)
+- [13. Limitations & Future Enhancements](#13-limitations--future-enhancements)
+- [14. Contributors & Attribution](#14-contributors--attribution)
 
 ---
 
@@ -227,7 +228,7 @@ All figures have been mathematically verified across Databricks PySpark and Powe
 | Metric Category | Business Indicator | Validated Value | Note / Calculation Formula |
 | :--- | :--- | :---: | :--- |
 | **Marketplace Scale** | Total Registered Orders | **99,441** | All order lifecycle statuses in `olist_orders_dataset` / `fact_orders` |
-| | Orders with Items | **98,666** | Orders with fulfilled physical items in `fact_sales` (775 canceled/unavailable before item assignment) |
+| | Orders with Items | **98,666** | Orders represented in `fact_sales` (775 registered orders do not have corresponding order-item records in the transaction dataset) |
 | | Total Order Items | **112,650** | Individual SKU items fulfilled across all orders |
 | | Unique Products | **32,951** | Catalog breadth across 71 product categories |
 | | Active Sellers | **3,095** | Merchants fulfilling orders in marketplace directory |
@@ -252,7 +253,22 @@ All figures have been mathematically verified across Databricks PySpark and Powe
 
 ---
 
-## 10. Repository Structure
+## 10. Pipeline & Dashboard Execution Evidence
+
+Visual evidence documenting the actual execution of the Databricks Lakehouse pipelines and the live Power BI dashboard is cataloged in [`docs/screenshots/`](docs/screenshots/):
+
+| Pipeline Stage / View | Description | File Link |
+| :--- | :--- | :---: |
+| **Silver Layer Quality Audit** | Verification cell from `notebooks/01_Raw_Bronze_Silver_Pipeline.ipynb` confirming all 11 Silver Delta tables passed row-count and integrity assertions with 0 failures. | [View Screenshot](docs/screenshots/01_silver_audit_pass.png) |
+| **Gold Catalog Verification** | Databricks Unity Catalog Lakehouse inventory verifying registered tables across Bronze, Silver, and Gold schemas. | [View Screenshot](docs/screenshots/02_gold_table_inventory.png) |
+| **Gold Executive KPIs Output** | Execution output from `notebooks/gold/02_Gold_Layer_Analytics.ipynb` displaying `kpi_executive_summary` with 98,666 orders with items, 112,650 order items, R\$ 15.84M gross revenue, and R\$ 160.58 AOV. | [View Screenshot](docs/screenshots/03_gold_executive_kpis.png) |
+| **Delivery Performance Breakdown** | Execution output from `notebooks/gold/02_Gold_Layer_Analytics.ipynb` validating `fact_orders` delivery categorization (89,853 on-time, 6,533 late, 2,963 not applicable, 92 unknown). | [View Screenshot](docs/screenshots/04_gold_delivery_performance.png) |
+| **Power BI: Executive Overview** | Page 1 of the interactive Power BI dashboard (`ShopPulse_Dashboard.pbix`) connected to Databricks SQL Warehouse, showcasing executive KPI cards and monthly trends. | [View Screenshot](docs/screenshots/05_powerbi_dashboard_overview.png) |
+| **Power BI: Sales & Category Analysis** | Page 2 of the Power BI dashboard displaying product category GMV rankings, geographic sales distributions, and seller state breakdown. | [View Screenshot](docs/screenshots/06_powerbi_sales_analysis.png) |
+
+---
+
+## 11. Repository Structure
 
 ```text
 ShopPulse-Olist-Ecommerce-Intelligence/
@@ -298,6 +314,13 @@ ShopPulse-Olist-Ecommerce-Intelligence/
 │       └── logger.py                                 <- Structured execution logging utility
 │
 └── docs/
+    ├── screenshots/                                  <- Visual execution evidence (Databricks & Power BI)
+    │   ├── 01_silver_audit_pass.png
+    │   ├── 02_gold_table_inventory.png
+    │   ├── 03_gold_executive_kpis.png
+    │   ├── 04_gold_delivery_performance.png
+    │   ├── 05_powerbi_dashboard_overview.png
+    │   └── 06_powerbi_sales_analysis.png
     ├── DATA_VALIDATION_REPORT.md                     <- Pre-ingestion file audit and record validation
     ├── PHASE_1A_SECONDARY_AUDIT.md                   <- Relational integrity and null checks
     ├── PHASE_1B_API_EXTRACTION_REPORT.md             <- Holiday API response validation
@@ -306,7 +329,7 @@ ShopPulse-Olist-Ecommerce-Intelligence/
 
 ---
 
-## 11. Setup and Execution Instructions
+## 12. Setup and Execution Instructions
 
 ### Prerequisites
 - Python 3.10+ (Python 3.12 recommended)
@@ -353,7 +376,7 @@ Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The repor
 
 ---
 
-## 12. Limitations & Future Enhancements
+## 13. Limitations & Future Enhancements
 
 - **Geographic Representation:** Geolocation coordinate files contain multiple zip-code prefix duplicates; implementing geospatial polygon clustering with H3 indexing would enhance spatial precision.
 - **Streaming Ingestion:** Current pipeline runs in scheduled batch micro-batches; migrating to Databricks Delta Live Tables (DLT) with Auto Loader would enable near real-time streaming ingestion.
@@ -361,7 +384,7 @@ Open `powerbi/ShopPulse_Dashboard.pbix` in Microsoft Power BI Desktop. The repor
 
 ---
 
-## 13. Contributors & Attribution
+## 14. Contributors & Attribution
 
 - **Pratyush Pratim Thakur** ([@pratyush-max](https://github.com/pratyush-max)) — Project Lead, Architecture, Data Engineering & BI Development
 - **ShopPulse Engineering Team** — B.Tech Computer Science & Engineering (AI & ML)
